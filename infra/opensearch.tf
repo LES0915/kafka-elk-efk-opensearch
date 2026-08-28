@@ -85,11 +85,13 @@ resource "aws_opensearch_domain" "factory" {
   # 데이터 구조가 변경되면 => 교체해야함
   # 이런 정보가 없으면 opensearch가 데이터를 보고 => 타입 추정 => 타입 매칭 (오류 많이 발생함)
   # timestamp 에서 오류 발생이 많음
+  # Firehose 가 실제로 쓰는 인덱스(var.opensearch_index_name)에 매핑을 건다.
+  # 한 줄 + \" 이스케이프로 Windows(cmd) / Linux / macOS 모두에서 동작.
+  # 매핑 실패(예: 이미 존재)해도 20분짜리 도메인이 taint 되지 않도록 on_failure = continue.
   provisioner "local-exec" {
-    command = <<-EOT
-      curl -X PUT "https://${self.endpoint}/factory-sensor" \
-        -H "Content-Type: application/json" \
-        -d '{"mappings":{"properties":{"@timestamp":{"type":"date_nanos"},"timestamp":{"type":"date"},"vector_ingest_at":{"type":"date_nanos"},"sensor_id":{"type":"keyword"},"temperature":{"type":"float"},"humidity":{"type":"float"},"status":{"type":"keyword"}}}}'
+    on_failure = continue
+    command    = <<-EOT
+      curl -sS -X PUT "https://${self.endpoint}/${var.opensearch_index_name}" -H "Content-Type: application/json" -d "{\"mappings\":{\"properties\":{\"@timestamp\":{\"type\":\"date_nanos\"},\"timestamp\":{\"type\":\"date\"},\"vector_ingest_at\":{\"type\":\"date_nanos\"},\"sensor_id\":{\"type\":\"keyword\"},\"temperature\":{\"type\":\"float\"},\"humidity\":{\"type\":\"float\"},\"status\":{\"type\":\"keyword\"}}}}"
     EOT
   }
 }

@@ -5,9 +5,9 @@ variable "aws_region" {
 }
 
 variable "project_name" {
-  description = "프로젝트명"
+  description = "프로젝트명. Firehose 스트림 이름이 되며 .env 의 FIREHOSE_STREAM_NAME 과 반드시 동일해야 함"
   type        = string
-  default     = "de-ai-25-kakfa-efk"
+  default     = "de-ai-13-ap2-kafka"
 }
 # opensearch 서비스(<-엘라스틱서치)/ opensearch 대시보드(<-키바나) 접속 가능한 IP 입력
 variable "allowed_cidr" {
@@ -61,8 +61,8 @@ variable "firehose_buffer_interval" {
 variable "vector_iam_user_name" {
   description = "선택값. 로컬 Vector가 사용하는 기존 IAM User에 Firehose Put 권한을 Terraform으로 붙일 때 지정한다. 비워두면 정책만 생성한다."
   type        = string
-  # 개인 관리 번호로 교체 25 => xx
-  default = "de-ai-25-ap2-kafka-vector-user"
+  # 개인 관리 번호로 교체 13 => xx
+  default = ""
 }
 
 variable "tags" {

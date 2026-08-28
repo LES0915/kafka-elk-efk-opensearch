@@ -1,19 +1,18 @@
-# 1. sources (input-local kafka)
+# 1. sources (input - local kafka)
 sources:
   kafka_to_firehose_source:
     type: "kafka"
-    bootstrap_servers:  "kafka:9092"
+    bootstrap_servers: "kafka:9092"
     group_id: "vector-firehose-consumer"
     topics:
       - "factory-json-topic"
       - "factory-text-topic"
     decoding:
-      codec:  "json"
+      codec: "json"
     librdkafka_options:
-      "auto.offset.reset":  "earliest"
-    
+      "auto.offset.reset": "earliest"
 
-# 2. transform (처리시간 삽입)
+# 2. transform (처리 시간 삽입)
 transforms:
   add_ingest_time:
     type: "remap"
@@ -22,8 +21,9 @@ transforms:
     source: |
       .vector_ingest_at = now()
 
-# 3. sink (output-aws firehose)
+# 3. sinks (출력) - sinks 블록은 파일에 딱 하나. 그 안에 여러 sink 를 나열.
 sinks:
+  # 3-1. AWS Kinesis Firehose 전송
   firehose_sink:
     type: "aws_kinesis_firehose"
     inputs:
@@ -31,11 +31,12 @@ sinks:
     region: "${AWS_REGION}"
     stream_name: "${FIREHOSE_STREAM_NAME}"
     encoding:
-      codec:  "json"
+      codec: "json"
+    # 스트림이 없거나 권한이 없어도 vector 는 뜨도록 (전송 실패는 로그로만)
+    healthcheck:
+      enabled: false
 
-
-# 4. sink (output-debug)
-sinks:
+  # 3-2. 디버그용 콘솔 출력
   debug_console:
     type: "console"
     inputs:
