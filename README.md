@@ -72,7 +72,7 @@ Python 로그 생성기 ┤
        Kafka UI(대시보드)        Vector (서비스) -> kafka 메시지 firehose 전송
                                   │
                                   ▼
-                           AWS Firehose -> 버퍼링 -> s3(브론즈) or opensearch(인덱스 (센서/공장관리단위) 검색) -> Airflow DAG 활용 -> 메달리온 아키텍처 적용
+                           `AWS Firehose` -> 버퍼링 -> s3(opensearch 전송 실패한 데이터만 모은다) or `opensearch`(인덱스 (센서/공장관리단위) 검색) -> Airflow DAG 활용 -> 메달리온 아키텍처 적용
 ```
 
 # 개발 환경 구성
@@ -99,7 +99,7 @@ Python 로그 생성기 ┤
         - Input 스트림으로 파일, 버퍼, 라우팅, ... 대부분 지원
         - Output 스트림 대부분 서비스 모두 지원 (kafka/opensearch/s3/...)
             - 지원 플러그인 활용
-    - fluent-bit.conf -> 수정 -> docker compose restart -> 수정내용이 반영됨
+    - fluent-bit.conf -> 수정 -> docker compose restart -> 수정 내용이 반영됨
         - docker compose down  => docker compose up -d
     - 테스트 
         ```
@@ -111,7 +111,42 @@ Python 로그 생성기 ┤
         ```
 
 # 카프카 테스트
-- 컨테이너 접속
+- 카프카 구동 테스트
 ```
+    # 접속
     docker container exec -it kafka-local bash
+    # 토픽 생성
+    sh opt/kafka/bin/kafka-topics.sh --create --topic spacex --bootstrap-server 127.0.0.1:9092 --partitions 1 --replication-factor 1
+    
+    # 프로듀서 
+    sh opt/kafka/bin/kafka-console-producer.sh --topic spacex --bootstrap-server 127.0.0.1:9092
+    
+    # 컨슈머
+    sh opt/kafka/bin/kafka-console-consumer.sh --topic spacex --bootstrap-server 127.0.0.1:9092
+```
+- 메시지 수신 테스트
+```
+    # 컨슈머
+    sh opt/kafka/bin/kafka-console-consumer.sh --topic factory-json-topic --bootstrap-server 127.0.0.1:9092
+```
+
+# Vector
+- Datadog사에서 개발한 도구
+- Rust 개발. 로그, 메트릭 수집, 변환, 전송 처리. 초고성능, 경량 파이프라인 도구
+- 로그 확인
+```
+    docker logs -f vector
+```
+- 로그 샘플
+```
+{
+    "@timestamp":1787890534.104485,"headers":{},"humidity":71.7,
+    "message_key":null,"offset":18,"partition":0,"sensor_id":"AI-FACTORY-001",
+    "source_type":"kafka","status":"RUNNING","temperature":104.1,
+    "topic":"factory-json-topic",
+
+    # 지연시간 (로그 발생 => vector) 0.013초
+    "timestamp":"2026-08-28T04:15:34.604Z",             
+    "vector_ingest_at":"2026-08-28T04:15:34.617424692Z"
+}
 ```
