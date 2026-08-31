@@ -16,12 +16,12 @@ resource "aws_iam_role" "firehose" {
   })
 }
 
-# Firehose가 S3 백업, OpenSearch 인덱싱, CloudWatch 로그 기록을 할 수 있도록 허용
+# Firehose가 S3(bronze) 적재와 CloudWatch 로그 기록을 할 수 있도록 허용
 resource "aws_iam_role_policy" "firehose" {
   name = "${var.project_name}-firehose-policy"
   role = aws_iam_role.firehose.id
 
-  # s3에 조회, 객체 저장등 권한 조정, 오픈서치 제거
+  # S3 조회, 객체 저장 등 권한 부여
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -34,13 +34,13 @@ resource "aws_iam_role_policy" "firehose" {
           "s3:GetBucketLocation",
           "s3:GetObject",
           "s3:ListBucket",
-          "s3:ListBucketMultipartUploads"          
+          "s3:ListBucketMultipartUploads"
         ]
         Resource = [
           aws_s3_bucket.data_lake.arn,
           "${aws_s3_bucket.data_lake.arn}/*"
         ]
-      },      
+      },
       {
         Sid    = "CloudWatchErrorLogging"
         Effect = "Allow"

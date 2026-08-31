@@ -7,8 +7,9 @@ output "firehose_stream_arn" {
   value = aws_kinesis_firehose_delivery_stream.bronze.arn
 }
 
-output "firehose_backup_bucket" {
-  value = aws_s3_bucket.data_lake.bucket
+output "data_lake_bucket" {
+  description = "bronze/silver/gold 데이터가 적재되는 S3 버킷"
+  value       = aws_s3_bucket.data_lake.bucket
 }
 
 output "firehose_log_group" {

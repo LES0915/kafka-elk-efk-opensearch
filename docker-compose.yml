@@ -59,8 +59,8 @@ services:
       AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID}"
       AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY}"
       AWS_SESSION_TOKEN: "${AWS_SESSION_TOKEN:-}"
-      AWS_REGION: "${AWS_REGION:-ap-northeast-2}"
-      FIREHOSE_STREAM_NAME: "${FIREHOSE_STREAM_NAME:-de-ai-30-ap2-kafka}"
+      AWS_REGION: "${AWS_REGION:-ap-southeast-1}"
+      FIREHOSE_STREAM_NAME: "${FIREHOSE_STREAM_NAME:-de-ai-13-eb-step-pipeline-firehose}"
     depends_on:
       - kafka
     networks:

@@ -48,7 +48,7 @@ text_logger = create_rotation_logger("sensor_text", "sensor_text.log")
 
 # 3-2. 로그 발생
 def generate_logs() -> None:
-    # opensearch에서 date로 인식하게 하기 위해서 ISO-8601 적용
+    # Athena/Glue에서 date로 인식하게 하기 위해서 ISO-8601 적용
     timestamp = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
     data = {
         "timestamp"     : timestamp,            # 로그 발생 시간
@@ -61,7 +61,7 @@ def generate_logs() -> None:
     json_logger.info(json.dumps(data, ensure_ascii=False))
 
     # B 채널 : text
-    # 임의 편성, 의도적으로 비정형 데이터를 구성하여 로그 처리 반영, 실제는 둘 중 하나만 가면 됨
+    # 임의 편성, 의도적으로 비정형 데이터를 구성하여 로그 처리에 반영, 실제로는 둘 중 하나만 전송하면 됨
     text = (
         f"[{data['timestamp']}] ID={data['sensor_id']} |   "
         f"TEMP:{data['temperature']} |   HUMI:{data['humidity']} |   "
@@ -79,7 +79,7 @@ def main() -> None:
             # 로그 발생
             generate_logs()
             # 잠시 대기 -> 테스트상 텀 부여
-            time.sleep(2) # 명시적 대기 -> 추후 조정
+            time.sleep(1) # 명시적 대기 -> 추후 조정
     except Exception as e:
         print("종료 처리", e)
 

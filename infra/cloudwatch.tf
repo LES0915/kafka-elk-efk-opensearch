@@ -1,4 +1,4 @@
-# Firehose -> OpenSearch 전달 오류를 확인하기 위한 CloudWatch Logs
+# Firehose -> S3 전달 오류를 확인하기 위한 CloudWatch Logs
 resource "aws_cloudwatch_log_group" "firehose" {
   name              = local.firehose_log_group
   retention_in_days = 7
